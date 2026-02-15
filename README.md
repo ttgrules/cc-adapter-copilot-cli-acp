@@ -1,4 +1,4 @@
-# codecompanion-copilot-cli-acp
+# cc-adapter-copilot-cli-acp
 
 CodeCompanion.nvim extension for GitHub Copilot CLI's ACP (Agent Client Protocol) server.
 
@@ -13,26 +13,51 @@ This adapter enables CodeCompanion.nvim to communicate with GitHub Copilot CLI v
 
 ## Installation
 
-1. Ensure the adapter files are in your CodeCompanion.nvim adapters directory:
-   ```
-   lua/codecompanion/adapters/acp/init.lua
-   lua/codecompanion/adapters/acp/helpers.lua
+### Using lazy.nvim (Recommended)
+
+Add this repository as a dependency to CodeCompanion:
+
+```lua
+{
+  "olimorris/codecompanion.nvim",
+  dependencies = {
+    "neovim/nvim-lspconfig",
+    "nvim-lua/plenary.nvim",
+    -- Copilot CLI ACP Adapter
+    "JohnHunt/cc-adapter-copilot-cli-acp",
+  },
+  config = function()
+    require("codecompanion").setup({
+      adapters = {
+        copilot_cli = function()
+          return require("codecompanion.adapters").extend("copilot_cli", {})
+        end,
+      },
+      interactions = {
+        chat = {
+          adapter = "copilot_cli",
+        },
+      },
+    })
+  end,
+}
+```
+
+### Manual Installation
+
+1. Clone this repository to your Neovim config:
+   ```bash
+   git clone https://github.com/JohnHunt/cc-adapter-copilot-cli-acp ~/.config/nvim/pack/plugins/start/cc-adapter-copilot-cli-acp
    ```
 
-2. Configure CodeCompanion to use the Copilot CLI adapter in your setup:
+2. Configure CodeCompanion to use the Copilot CLI adapter:
    ```lua
    require("codecompanion").setup({
      adapters = {
-       acp = {
-         copilot_cli = "copilot_cli",
-       },
+       copilot_cli = function()
+         return require("codecompanion.adapters").extend("copilot_cli", {})
+       end,
      },
-   })
-   ```
-
-3. Set the adapter as your default:
-   ```lua
-   require("codecompanion").setup({
      interactions = {
        chat = {
          adapter = "copilot_cli",
@@ -43,18 +68,33 @@ This adapter enables CodeCompanion.nvim to communicate with GitHub Copilot CLI v
 
 ## Configuration
 
-The adapter uses the following defaults:
+The adapter works out-of-the-box with sensible defaults. You can customize settings when extending:
 
-- **Command**: `copilot --acp --stdio` (uses standard input/output for transport)
-- **Protocol Version**: 1 (ACP Protocol v1)
-- **Timeout**: 20 seconds
-- **Vision Support**: Enabled
+```lua
+require("codecompanion").setup({
+  adapters = {
+    copilot_cli = function()
+      return require("codecompanion.adapters").extend("copilot_cli", {
+        defaults = {
+          mcpServers = {},  -- Add MCP servers if needed
+          timeout = 20000,  -- 20 seconds
+        },
+      })
+    end,
+  },
+})
+```
+
+### Configuration Options
+
+- **timeout**: Request timeout in milliseconds (default: 20000)
+- **mcpServers**: Array of MCP (Model Context Protocol) servers to integrate (default: empty)
 
 ## How It Works
 
 The adapter communicates with Copilot CLI in stdio mode, which:
 - Pipes all ACP protocol messages through standard input/output
-- Enables seamless integration with IDEs and editors
+- Enables seamless integration with Neovim and other IDEs
 - Is the recommended mode for IDE integration per ACP specification
 
 Messages are formatted according to the ACP protocol specification and sent to Copilot CLI, which processes them and returns structured responses.
@@ -69,3 +109,9 @@ For issues or questions:
 - Check the [CodeCompanion.nvim documentation](https://codecompanion.olimorris.dev/)
 - Review the [Copilot CLI ACP documentation](https://docs.github.com/en/copilot/reference/acp-server)
 - Consult the [ACP protocol specifications](https://agentclientprotocol.com/protocol/overview)
+- Open an issue on this repository
+
+## License
+
+See the [LICENSE](LICENSE) file for details.
+
