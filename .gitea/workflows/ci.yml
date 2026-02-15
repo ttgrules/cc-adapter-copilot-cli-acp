@@ -1,0 +1,40 @@
+---
+name: CI
+
+"on":
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  lua-syntax:
+    name: Lua Syntax Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Install Lua compiler
+        run: apt update && apt install -y lua5.4
+      - name: Check Lua file syntax
+        run: |
+          set -euo pipefail
+          find . -type f -name '*.lua' -not -path './.git/*' -print0 | while IFS= read -r -d '' FILE; do
+            echo "Checking ${FILE}"
+            luac5.4 -p "${FILE}"
+          done
+
+  lua-format:
+    name: Lua Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Install Rust toolchain
+        run: |
+          apt update && apt install -y curl ca-certificates build-essential
+          curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal
+      - name: Install stylua
+        run: ~/.cargo/bin/cargo install --locked stylua
+      - name: Check Lua formatting
+        run: ~/.cargo/bin/stylua --check .
