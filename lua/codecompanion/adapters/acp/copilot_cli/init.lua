@@ -1,4 +1,4 @@
-local helpers = require("codecompanion.adapters.acp.copilot_cli.helpers")
+local helpers = require("codecompanion.adapters.acp.helpers")
 
 ---@class CodeCompanion.ACPAdapter.CopilotCLI: CodeCompanion.ACPAdapter
 return {
