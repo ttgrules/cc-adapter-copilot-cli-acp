@@ -11,6 +11,22 @@ env:
   CI_LUA_IMAGE: gitea.ttgrules.com/dev/lua:latest
 
 jobs:
+  pr-title-check:
+    name: PR Title Check
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR title uses conventional commit format
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          PATTERN='^[a-z]+(\([^)]+\))?(!)?: .+'
+          if ! echo "${PR_TITLE}" | grep -Eq "${PATTERN}"; then
+            echo "PR title must use Conventional Commits format"
+            echo "(e.g. feat(scope): summary)."
+            exit 1
+          fi
+
   lua-syntax:
     name: Lua Syntax Check
     runs-on: ubuntu-latest
@@ -26,7 +42,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          find . -type f -name '*.lua' -not -path './.git/*' -print0 | while IFS= read -r -d '' FILE; do
+          find . -type f -name '*.lua' -not -path './.git/*' -print0 | \
+            while IFS= read -r -d '' FILE; do
             echo "Checking ${FILE}"
             luac5.4 -p "${FILE}"
           done
@@ -44,3 +61,70 @@ jobs:
         uses: actions/checkout@v6.0.2
       - name: Check Lua formatting
         run: stylua --check .
+
+  release:
+    name: Release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ env.CI_LUA_IMAGE }}
+      credentials:
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_TOKEN }}
+    needs:
+      - lua-syntax
+      - lua-format
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v6.2.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v5.0.3
+        with:
+          path: ./node_modules
+          key: >-
+            cache-node-modules-${{ runner.os }}-${{
+            hashFiles('package-lock.json') }}
+          restore-keys: |
+            cache-node-modules-${{ runner.os }}-
+            cache-node-modules-
+
+      - name: Install dependencies
+        run: |
+          CACHE_HIT="${{ steps.cache-node-modules.outputs.cache-hit }}"
+          if [ "${CACHE_HIT}" = "true" ]; then
+            npm install
+          else
+            npm ci
+          fi
+
+      - name: Configure git author
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.local"
+
+      - name: Configure authenticated origin
+        run: |
+          REMOTE_URL="${{ github.server_url }}/${{ github.repository }}.git"
+          REMOTE_URL_WITH_TOKEN="$(echo "${REMOTE_URL}" | \
+            sed "s|://|://${{ secrets.API_TOKEN_GITEA }}@|")"
+          git remote set-url origin "${REMOTE_URL_WITH_TOKEN}"
+
+      - name: Run semantic-release
+        env:
+          GITEA_TOKEN: ${{ secrets.API_TOKEN_GITEA }}
+          GITEA_URL: ${{ github.server_url }}
+          GIT_AUTHOR_NAME: ${{ github.actor }}
+          GIT_AUTHOR_EMAIL: ${{ github.actor }}@users.noreply.local
+          GIT_COMMITTER_NAME: ${{ github.actor }}
+          GIT_COMMITTER_EMAIL: ${{ github.actor }}@users.noreply.local
+        run: npx semantic-release
