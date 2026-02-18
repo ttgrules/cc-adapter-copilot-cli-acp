@@ -9,6 +9,7 @@ name: CI
 
 env:
   CI_LUA_IMAGE: gitea.ttgrules.com/dev/lua:latest
+  CI_GENERIC_IMAGE: gitea.ttgrules.com/dev/generic:latest
 
 jobs:
   pr-title-check:
@@ -31,7 +32,7 @@ jobs:
     name: JSON Validate
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.CI_LUA_IMAGE }}
+      image: ${{ env.CI_GENERIC_IMAGE }}
       credentials:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_TOKEN }}
@@ -52,7 +53,7 @@ jobs:
     name: Format Check
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.CI_LUA_IMAGE }}
+      image: ${{ env.CI_GENERIC_IMAGE }}
       credentials:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_TOKEN }}
@@ -106,7 +107,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     container:
-      image: ${{ env.CI_LUA_IMAGE }}
+      image: ${{ env.CI_GENERIC_IMAGE }}
       credentials:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_TOKEN }}
