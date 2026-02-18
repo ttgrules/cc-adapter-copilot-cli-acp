@@ -47,6 +47,7 @@ Add this repository as a dependency to CodeCompanion:
 ### Manual Installation
 
 1. Clone this repository to your Neovim config:
+
    ```bash
    git clone https://github.com/ttgrules/cc-adapter-copilot-cli-acp ~/.config/nvim/pack/plugins/start/cc-adapter-copilot-cli-acp
    ```
@@ -98,6 +99,7 @@ require("codecompanion").setup({
 ## Support
 
 For issues or questions:
+
 - Check the [CodeCompanion.nvim documentation](https://codecompanion.olimorris.dev/)
 - Review the [Copilot CLI ACP documentation](https://docs.github.com/en/copilot/reference/acp-server)
 - Consult the [ACP protocol specifications](https://agentclientprotocol.com/protocol/overview)
