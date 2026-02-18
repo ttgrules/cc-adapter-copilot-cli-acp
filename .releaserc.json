@@ -1,0 +1,14 @@
+{
+  "branches": ["main"],
+  "tagFormat": "v${version}",
+  "plugins": [
+    [
+      "@semantic-release/exec",
+      {
+        "analyzeCommitsCmd": "node scripts/release/analyze-pr-titles.mjs",
+        "generateNotesCmd": "node scripts/release/generate-pr-release-notes.mjs"
+      }
+    ],
+    "@saithodev/semantic-release-gitea"
+  ]
+}
