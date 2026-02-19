@@ -85,7 +85,7 @@ jobs:
           find . -type f -name '*.lua' -not -path './.git/*' -print0 | \
             while IFS= read -r -d '' FILE; do
             echo "Checking ${FILE}"
-            luac5.4 -p "${FILE}"
+            luac5.1 -p "${FILE}"
           done
 
   lua-format:

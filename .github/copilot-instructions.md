@@ -16,7 +16,7 @@
 ```bash
 find . -type f -name '*.json' -not -path './.git/*' -not -path './node_modules/*' -print0 | while IFS= read -r -d '' file; do jq empty "${file}"; done
 npx --yes prettier --check "**/*.{json,md,mjs}"
-find . -type f -name '*.lua' -not -path './.git/*' -print0 | while IFS= read -r -d '' file; do luac5.4 -p "${file}"; done
+find . -type f -name '*.lua' -not -path './.git/*' -print0 | while IFS= read -r -d '' file; do luac5.1 -p "${file}"; done
 stylua --check .
 ```
 
