@@ -111,7 +111,8 @@ jobs:
       - lua-syntax
       - lua-format
       - json-validate
-      - format-check      - renovate-config-validate
+      - format-check
+      - renovate-config-validate
       - renovate-policy-check
 
     steps:
