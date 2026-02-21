@@ -111,7 +111,9 @@ jobs:
       - lua-syntax
       - lua-format
       - json-validate
-      - format-check
+      - format-check      - renovate-config-validate
+      - renovate-policy-check
+
     steps:
       - name: Enforce required check jobs
         shell: bash
@@ -122,6 +124,8 @@ jobs:
             "lua-format:${{ needs.lua-format.result }}"
             "json-validate:${{ needs.json-validate.result }}"
             "format-check:${{ needs.format-check.result }}"
+            "renovate-config-validate:${{ needs.renovate-config-validate.result }}"
+            "renovate-policy-check:${{ needs.renovate-policy-check.result }}"
           )
 
           if [ "${{ github.event_name }}" = "pull_request" ]; then
