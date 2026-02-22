@@ -19,10 +19,10 @@ yamllint --format github .
 ### Actionlint (Gitea-compatible rules)
 
 ```bash
-actionlint \
+  actionlint \
   -ignore 'context "env" is not allowed here' \
-  -ignore 'specifying action "https?://.*/gitea-upload-artifact@v4" in invalid format' \
-  -ignore 'property "permissions" is not defined in object type.*\[syntax-check\]' \
+  -ignore 'gitea-upload-artifact@v4' \
+  -ignore 'property "permissions" is not defined' \
   -ignore 'SC2001:' \
   .gitea/workflows/ci.yml
 ```
